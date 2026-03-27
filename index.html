@@ -66,6 +66,7 @@
 
   .loading { color: #555; font-style: italic; font-size: .9rem; }
   .error-msg { color: #9b2335; font-size: .85rem; margin-top: -10px; margin-bottom: 10px; display: none; }
+  #cartTotal { font-weight: bold; font-size: .95rem; border-top: 1px solid #ddd; margin-top: 6px; padding-top: 8px; }
 </style>
 </head>
 <body>
@@ -96,6 +97,7 @@
       <th>Plant</th>
       <th>Type</th>
       <th>Sun</th>
+      <th>Price</th>
       <th>Stock</th>
       <th>Qty</th>
     </tr>
@@ -108,6 +110,7 @@
 <div id="cartSection">
   <strong>Your Order:</strong>
   <ul id="cartList"></ul>
+  <div id="cartTotal"></div>
 </div>
 
 <button class="submit" id="submitBtn" disabled>Place Order</button>
@@ -119,30 +122,30 @@
 
 <script>
 // ── CONFIG ──────────────────────────────────────────────
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxL7S_HURgpQ6dXGAXXvOsjjSQGmP5EuGUQoKPhWGTrjmU3CASQWrcl_qkqgE9A6DaEYA/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
 const MAX_QTY = 5;
 
 // ── DEMO DATA (replaced by live fetch once script is deployed) ──
 let PLANTS = [
-  { id:1,  sci:"Aronia melanocarpa",      common:"Black Chokeberry",        type:"Shrub",     sun:"Part shade / Full sun",       location:"Shoreline / Upland", available:0, ordered:0 },
-  { id:2,  sci:"Sambucus nigra",          common:"Black Elderberry",        type:"Shrub",     sun:"Full sun",                    location:"Shoreline / Upland", available:0, ordered:0 },
-  { id:3,  sci:"Cephalanthus occidentalis",common:"Buttonbush",             type:"Shrub",     sun:"Part shade / Shade",          location:"Shoreline",          available:0, ordered:0 },
-  { id:4,  sci:"Spiraea alba",            common:"Narrow-leaved Meadowsweet",type:"Shrub",    sun:"Full sun",                    location:"Shoreline",          available:0, ordered:0 },
-  { id:5,  sci:"Cornus sericea",          common:"Red Osier Dogwood",       type:"Shrub",     sun:"Full sun / Part shade",       location:"Shoreline / Upland", available:0, ordered:0 },
-  { id:6,  sci:"Physocarpus opulifolius", common:"Ninebark",                type:"Shrub",     sun:"Full sun / Part shade",       location:"Shoreline / Upland", available:0, ordered:0 },
-  { id:7,  sci:"Myrica gale",             common:"Sweet Gale",              type:"Shrub",     sun:"Full sun / Part shade",       location:"Shoreline",          available:0, ordered:0 },
-  { id:8,  sci:"Rubus odoratus",          common:"Flowering Raspberry",     type:"Shrub",     sun:"Full sun / Part shade / Shade",location:"Upland",            available:0, ordered:0 },
-  { id:9,  sci:"Spiraea tomentosa",       common:"Steeplebush",             type:"Shrub",     sun:"Full sun",                    location:"Shoreline",          available:0, ordered:0 },
-  { id:10, sci:"Betula papyrifera",       common:"White Birch",             type:"Tree",      sun:"Full sun",                    location:"Shoreline / Upland", available:0, ordered:0 },
-  { id:11, sci:"Betula alleghaniensis",   common:"Yellow Birch",            type:"Tree",      sun:"Part shade / Shade",          location:"Shoreline",          available:0, ordered:0 },
-  { id:12, sci:"Eutrochium maculatum",    common:"Joe-Pye Weed",            type:"Perennial", sun:"Full sun / Part shade",       location:"Shoreline",          available:0, ordered:0 },
-  { id:13, sci:"Helenium autumnale",      common:"Sneezeweed",              type:"Perennial", sun:"Full sun / Part shade",       location:"Shoreline / Upland", available:0, ordered:0 },
-  { id:14, sci:"Rudbeckia hirta",         common:"Black-eyed Susan",        type:"Perennial", sun:"Full sun",                    location:"Upland",             available:0, ordered:0 },
-  { id:15, sci:"Penstemon hirsutus",      common:"Hairy Beardtongue",       type:"Perennial", sun:"Full sun / Part shade",       location:"Upland",             available:0, ordered:0 },
-  { id:16, sci:"Verbena hastata",         common:"Blue Vervain",            type:"Perennial", sun:"Full sun / Part shade / Shade",location:"Upland",            available:0, ordered:0 },
-  { id:17, sci:"Symphyotrichum novae-angliae",common:"New England Aster",   type:"Perennial", sun:"Full sun / Part shade",       location:"Shoreline / Upland", available:0, ordered:0 },
-  { id:18, sci:"Solidago caesia",         common:"Bluestem Goldenrod",      type:"Perennial", sun:"Full sun / Part shade",       location:"Upland",             available:0, ordered:0 },
-  { id:19, sci:"Asclepias incarnata",     common:"Swamp Milkweed",          type:"Perennial", sun:"Full sun / Part shade",       location:"Shoreline / Upland", available:0, ordered:0 },
+  { id:1,  sci:"Aronia melanocarpa",      common:"Black Chokeberry",        type:"Shrub",     sun:"Part shade / Full sun",       location:"Shoreline / Upland", available:0, ordered:0, price:0 },
+  { id:2,  sci:"Sambucus nigra",          common:"Black Elderberry",        type:"Shrub",     sun:"Full sun",                    location:"Shoreline / Upland", available:0, ordered:0, price:0 },
+  { id:3,  sci:"Cephalanthus occidentalis",common:"Buttonbush",             type:"Shrub",     sun:"Part shade / Shade",          location:"Shoreline",          available:0, ordered:0, price:0 },
+  { id:4,  sci:"Spiraea alba",            common:"Narrow-leaved Meadowsweet",type:"Shrub",    sun:"Full sun",                    location:"Shoreline",          available:0, ordered:0, price:0 },
+  { id:5,  sci:"Cornus sericea",          common:"Red Osier Dogwood",       type:"Shrub",     sun:"Full sun / Part shade",       location:"Shoreline / Upland", available:0, ordered:0, price:0 },
+  { id:6,  sci:"Physocarpus opulifolius", common:"Ninebark",                type:"Shrub",     sun:"Full sun / Part shade",       location:"Shoreline / Upland", available:0, ordered:0, price:0 },
+  { id:7,  sci:"Myrica gale",             common:"Sweet Gale",              type:"Shrub",     sun:"Full sun / Part shade",       location:"Shoreline",          available:0, ordered:0, price:0 },
+  { id:8,  sci:"Rubus odoratus",          common:"Flowering Raspberry",     type:"Shrub",     sun:"Full sun / Part shade / Shade",location:"Upland",            available:0, ordered:0, price:0 },
+  { id:9,  sci:"Spiraea tomentosa",       common:"Steeplebush",             type:"Shrub",     sun:"Full sun",                    location:"Shoreline",          available:0, ordered:0, price:0 },
+  { id:10, sci:"Betula papyrifera",       common:"White Birch",             type:"Tree",      sun:"Full sun",                    location:"Shoreline / Upland", available:0, ordered:0, price:0 },
+  { id:11, sci:"Betula alleghaniensis",   common:"Yellow Birch",            type:"Tree",      sun:"Part shade / Shade",          location:"Shoreline",          available:0, ordered:0, price:0 },
+  { id:12, sci:"Eutrochium maculatum",    common:"Joe-Pye Weed",            type:"Perennial", sun:"Full sun / Part shade",       location:"Shoreline",          available:0, ordered:0, price:0 },
+  { id:13, sci:"Helenium autumnale",      common:"Sneezeweed",              type:"Perennial", sun:"Full sun / Part shade",       location:"Shoreline / Upland", available:0, ordered:0, price:0 },
+  { id:14, sci:"Rudbeckia hirta",         common:"Black-eyed Susan",        type:"Perennial", sun:"Full sun",                    location:"Upland",             available:0, ordered:0, price:0 },
+  { id:15, sci:"Penstemon hirsutus",      common:"Hairy Beardtongue",       type:"Perennial", sun:"Full sun / Part shade",       location:"Upland",             available:0, ordered:0, price:0 },
+  { id:16, sci:"Verbena hastata",         common:"Blue Vervain",            type:"Perennial", sun:"Full sun / Part shade / Shade",location:"Upland",            available:0, ordered:0, price:0 },
+  { id:17, sci:"Symphyotrichum novae-angliae",common:"New England Aster",   type:"Perennial", sun:"Full sun / Part shade",       location:"Shoreline / Upland", available:0, ordered:0, price:0 },
+  { id:18, sci:"Solidago caesia",         common:"Bluestem Goldenrod",      type:"Perennial", sun:"Full sun / Part shade",       location:"Upland",             available:0, ordered:0, price:0 },
+  { id:19, sci:"Asclepias incarnata",     common:"Swamp Milkweed",          type:"Perennial", sun:"Full sun / Part shade",       location:"Shoreline / Upland", available:0, ordered:0, price:0 },
 ];
 
 let cart = {};
@@ -183,6 +186,7 @@ function renderTable() {
         "<span style='color:#666;font-size:.8rem'>" + p.sci + "</span></td>" +
       "<td>" + p.type + "</td>" +
       "<td>" + p.sun + "</td>" +
+      "<td>" + (p.price > 0 ? "$" + p.price.toFixed(2) : "—") + "</td>" +
       "<td><span class='status-badge status-" + status + "'>" + label + "</span></td>" +
       "<td>" + (sold ? "—" :
         "<div class='qty-ctrl'>" +
@@ -223,10 +227,21 @@ function renderCart() {
     return;
   }
   section.style.display = "block";
+  var total = 0;
   list.innerHTML = entries.map(function(e) {
     const p = PLANTS.find(function(x){ return x.id == e[0]; });
-    return "<li>" + p.common + " <em>(" + p.sci + ")</em> &times; " + e[1] + "</li>";
+    const lineTotal = p.price > 0 ? p.price * e[1] : null;
+    if (lineTotal) total += lineTotal;
+    const priceStr = lineTotal ? " — $" + lineTotal.toFixed(2) : "";
+    return "<li>" + p.common + " &times; " + e[1] + priceStr + "</li>";
   }).join("");
+  var totalEl = document.getElementById("cartTotal");
+  if (total > 0) {
+    totalEl.textContent = "Total: $" + total.toFixed(2);
+    totalEl.style.display = "block";
+  } else {
+    totalEl.style.display = "none";
+  }
   btn.disabled = false;
 }
 
@@ -243,7 +258,7 @@ document.getElementById("submitBtn").addEventListener("click", async function() 
     .filter(function(e){ return e[1] > 0; })
     .map(function(e) {
       const p = PLANTS.find(function(x){ return x.id == e[0]; });
-      return { sci: p.sci, common: p.common, qty: e[1] };
+      return { sci: p.sci, common: p.common, qty: e[1], price: p.price || 0 };
     });
 
   const btn = document.getElementById("submitBtn");
@@ -270,9 +285,10 @@ document.getElementById("submitBtn").addEventListener("click", async function() 
   });
 
   const orderNum = "ORD-" + Date.now().toString().slice(-6);
-  const summary  = items.map(function(i){ return i.qty + "x " + i.common; }).join(", ");
+  var orderTotal = items.reduce(function(sum,i){ return sum + (i.price||0)*i.qty; }, 0);
+  const summary  = items.map(function(i){ return i.qty + "x " + i.common + (i.price ? " ($" + (i.price*i.qty).toFixed(2) + ")" : ""); }).join(", ");
   document.getElementById("successDetail").textContent =
-    "Order " + orderNum + " received for " + name + " (" + email + "): " + summary + ". A confirmation has been sent to your email.";
+    "Order " + orderNum + " received for " + name + " (" + email + "): " + summary + (orderTotal > 0 ? ". Total: $" + orderTotal.toFixed(2) : "") + ". A confirmation has been sent to your email.";
   document.getElementById("successMsg").style.display = "block";
 
   cart = {};
@@ -315,7 +331,7 @@ function getInventory() {
     var r = data[i];
     if (!r[0]) continue;
     plants.push({ id:i, sci:r[0], common:r[1], type:r[2],
-                  sun:r[3], location:r[4], available:r[5], ordered:r[6] });
+                  sun:r[3], location:r[4], available:r[5], ordered:r[6], price:r[7]||0 });
   }
   return ContentService
     .createTextOutput(JSON.stringify({ plants: plants }))
@@ -336,16 +352,18 @@ function processOrder(payload) {
       var rem = data[i][5] - data[i][6];
       if (rem <= 0) { rejected.push(item.common + " (sold out)"); break; }
       var qty = Math.min(item.qty, rem);
-      orders.appendRow([item.sci, payload.name, qty, payload.email,
+      var lineTotal = (item.price||0) * qty;
+      orders.appendRow([item.sci, payload.name, qty, item.price||0, lineTotal, payload.email,
                         new Date().toLocaleString(), orderNum, payload.notes||""]);
-      accepted.push(item.common + " x" + qty);
+      accepted.push(item.common + " x" + qty + (item.price ? " ($" + (item.price*qty).toFixed(2) + ")" : ""));
       break;
     }
   });
 
+  var grandTotal = payload.items.reduce(function(s,i){ return s + (i.price||0)*Math.min(i.qty, 999); }, 0);
   var body = "Hi " + payload.name + ",\n\n";
   if (accepted.length) body += "Order confirmed (#" + orderNum + "):\n" +
-    accepted.map(function(a){ return "  - " + a; }).join("\n") + "\n\n";
+    accepted.map(function(a){ return "  - " + a; }).join("\n") + (grandTotal > 0 ? "\n\nOrder total: $" + grandTotal.toFixed(2) : "") + "\n\n";
   if (rejected.length) body += "Sold out (not processed):\n" +
     rejected.map(function(r){ return "  - " + r; }).join("\n") + "\n\n";
   body += "See you at the plant sale!\n";
