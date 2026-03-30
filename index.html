@@ -1,14 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Enviro Lac Gauvreau — Plant Sale</title>
+<title>Enviro Lac Gauvreau — Vente de plantes / Plant Sale</title>
 <style>
-  body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; color: #222; }
+  body { font-family: Arial, sans-serif; max-width: 960px; margin: 40px auto; padding: 0 20px; color: #222; }
   h1 { font-size: 1.5rem; margin-bottom: 4px; }
-  p.sub { color: #555; margin-bottom: 24px; font-size: .9rem; }
+  p.sub { color: #555; margin-bottom: 8px; font-size: .9rem; }
   hr { border: none; border-top: 1px solid #ddd; margin: 24px 0; }
+
+  /* Two column layout */
+  .bilingual { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+  .col-fr { border-right: 1px solid #ddd; padding-right: 40px; }
+  .col-en { padding-left: 0; }
+  .col-label {
+    font-size: .7rem; font-weight: bold; letter-spacing: .1em;
+    text-transform: uppercase; color: #2d6a4f;
+    margin-bottom: 12px; padding-bottom: 4px;
+    border-bottom: 2px solid #2d6a4f; display: inline-block;
+  }
+
+  @media(max-width: 640px) {
+    .bilingual { grid-template-columns: 1fr; gap: 0; }
+    .col-fr { border-right: none; padding-right: 0; border-bottom: 1px solid #ddd; padding-bottom: 24px; margin-bottom: 24px; }
+  }
 
   /* Member fields */
   label { display: block; font-weight: bold; font-size: .85rem; margin-bottom: 4px; }
@@ -19,181 +35,293 @@
   }
   input:focus { outline: 2px solid #2d6a4f; border-color: #2d6a4f; }
 
+  /* Shared fields note */
+  .shared-note {
+    background: #f0faf3; border: 1px solid #b7e4c7;
+    padding: 10px 14px; border-radius: 4px;
+    font-size: .82rem; color: #2d6a4f; margin-bottom: 20px;
+  }
+
   /* Plant table */
-  table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  table { width: 100%; border-collapse: collapse; font-size: .85rem; }
   th { background: #2d6a4f; color: #fff; padding: 8px 10px; text-align: left; font-weight: normal; }
-  td { padding: 7px 10px; border-bottom: 1px solid #eee; vertical-align: middle; }
+  td { padding: 7px 8px; border-bottom: 1px solid #eee; vertical-align: middle; }
   tr:last-child td { border-bottom: none; }
   tr.sold-out td { color: #999; }
 
   .status-badge {
-    font-size: .75rem; padding: 2px 7px; border-radius: 3px;
+    font-size: .72rem; padding: 2px 6px; border-radius: 3px;
     display: inline-block; white-space: nowrap;
   }
   .status-available { background: #e6f4ea; color: #276749; }
   .status-low       { background: #fff3cd; color: #7d5a00; }
   .status-soldout   { background: #fde8e8; color: #9b2335; }
 
-  .qty-ctrl { display: flex; align-items: center; gap: 6px; }
+  .qty-ctrl { display: flex; align-items: center; gap: 5px; }
   .qty-ctrl button {
-    width: 26px; height: 26px; border: 1px solid #bbb; background: #f5f5f5;
-    border-radius: 3px; font-size: 1rem; cursor: pointer; line-height: 1;
+    width: 24px; height: 24px; border: 1px solid #bbb; background: #f5f5f5;
+    border-radius: 3px; font-size: .95rem; cursor: pointer; line-height: 1;
   }
   .qty-ctrl button:hover:not(:disabled) { background: #2d6a4f; color: #fff; border-color: #2d6a4f; }
   .qty-ctrl button:disabled { opacity: .35; cursor: not-allowed; }
-  .qty-val { min-width: 20px; text-align: center; font-weight: bold; }
+  .qty-val { min-width: 18px; text-align: center; font-weight: bold; font-size: .9rem; }
 
   /* Cart */
-  #cartSection { display: none; }
-  #cartList { margin: 8px 0 16px; padding-left: 20px; font-size: .9rem; line-height: 1.9; }
+  .cart-section { display: none; }
+  .cart-list { margin: 8px 0 10px; padding-left: 20px; font-size: .88rem; line-height: 1.9; }
+  .cart-total { font-weight: bold; font-size: .92rem; border-top: 1px solid #ddd; margin-top: 6px; padding-top: 8px; }
 
   /* Submit */
   button.submit {
     background: #2d6a4f; color: #fff; border: none;
-    padding: 10px 28px; font-size: 1rem; border-radius: 4px;
-    cursor: pointer;
+    padding: 10px 24px; font-size: .95rem; border-radius: 4px; cursor: pointer;
   }
   button.submit:hover:not(:disabled) { background: #1a3a2a; }
   button.submit:disabled { opacity: .5; cursor: not-allowed; }
 
   /* Success */
-  #successMsg {
+  .success-msg {
     display: none; background: #e6f4ea; border: 1px solid #a8d5b5;
-    padding: 16px 20px; border-radius: 4px; margin-top: 20px;
+    padding: 14px 18px; border-radius: 4px; margin-top: 20px;
   }
-  #successMsg h2 { margin: 0 0 6px; font-size: 1.1rem; color: #276749; }
-  #successMsg p  { margin: 0; font-size: .9rem; color: #333; }
+  .success-msg h2 { margin: 0 0 6px; font-size: 1.05rem; color: #276749; }
+  .success-msg p  { margin: 0; font-size: .88rem; color: #333; }
 
-  .loading { color: #555; font-style: italic; font-size: .9rem; }
-  .error-msg { color: #9b2335; font-size: .85rem; margin-top: -10px; margin-bottom: 10px; display: none; }
-  #cartTotal { font-weight: bold; font-size: .95rem; border-top: 1px solid #ddd; margin-top: 6px; padding-top: 8px; }
+  .loading { color: #555; font-style: italic; font-size: .88rem; }
+  .error-msg { color: #9b2335; font-size: .82rem; margin-top: -10px; margin-bottom: 10px; display: none; }
+
+  /* Header */
+  .page-header { margin-bottom: 20px; }
+  .page-header h1 { margin-bottom: 2px; }
+  .page-header h2 { font-size: 1rem; font-weight: normal; color: #444; margin-bottom: 6px; }
 </style>
 </head>
 <body>
 
-<h1>🌿 Enviro Lac Gauvreau</h1>
-<h2 style="font-size:1.1rem; font-weight:normal; color:#444; margin-bottom:4px;">Annual Plant Sale</h2>
-<p class="sub">Members only &mdash; order below while supplies last.</p>
-<p class="sub">Not a member yet this year? <a href="https://www.zeffy.com/en-CA/ticketing/elg-membership" target="_blank">Sign up here</a>.</p>
-
-<label for="memberName">Full Name *</label>
-<input type="text" id="memberName" placeholder="Your name">
-<span class="error-msg" id="nameError">Please enter your name.</span>
-
-<label for="memberEmail">Email Address *</label>
-<input type="email" id="memberEmail" placeholder="you@example.com">
-<span class="error-msg" id="emailError">Please enter a valid email.</span>
-
-<label for="memberNotes">Notes (optional)</label>
-<input type="text" id="memberNotes" placeholder="Pickup preferences, questions…">
-
-<hr>
-
-<h2 style="font-size:1rem; margin-bottom:12px;">Available Plants</h2>
-<div id="loadingMsg" class="loading">Loading inventory…</div>
-
-<table id="plantTable" style="display:none">
-  <thead>
-    <tr>
-      <th>Plant</th>
-      <th>Type</th>
-      <th>Sun</th>
-      <th>Price</th>
-      <th>Stock</th>
-      <th>Qty</th>
-    </tr>
-  </thead>
-  <tbody id="plantBody"></tbody>
-</table>
-
-<hr>
-
-<div id="cartSection">
-  <strong>Your Order:</strong>
-  <ul id="cartList"></ul>
-  <div id="cartTotal"></div>
+<div class="page-header">
+  <h1>🌿 Enviro Lac Gauvreau</h1>
+  <h2>Vente de plantes / Annual Plant Sale</h2>
+  <p class="sub">Membres seulement — commandez ci-dessous tant qu'il reste des stocks. &nbsp;|&nbsp; Members only — order below while supplies last.</p>
+  <p class="sub">
+    Pas encore membre cette année ? <a href="https://www.zeffy.com/en-CA/ticketing/elg-membership" target="_blank">Inscrivez-vous ici</a>.
+    &nbsp;|&nbsp;
+    Not a member yet this year? <a href="https://www.zeffy.com/en-CA/ticketing/elg-membership" target="_blank">Sign up here</a>.
+  </p>
 </div>
 
-<button class="submit" id="submitBtn" disabled>Place Order</button>
+<!-- Shared member info note -->
+<div class="shared-note">
+  ℹ️ Remplissez vos coordonnées une seule fois — votre commande inclura toutes les plantes sélectionnées des deux colonnes.<br>
+  Fill in your details once — your order will include all plants selected from both columns.
+</div>
 
-<div id="successMsg">
-  <h2>&#10003; Order placed!</h2>
-  <p id="successDetail"></p>
+<!-- Shared member fields -->
+<div style="max-width:460px">
+  <label for="memberName">Nom complet / Full Name *</label>
+  <input type="text" id="memberName" placeholder="Votre nom / Your name">
+  <span class="error-msg" id="nameError">Veuillez entrer votre nom. / Please enter your name.</span>
+
+  <label for="memberEmail">Courriel / Email Address *</label>
+  <input type="email" id="memberEmail" placeholder="vous@exemple.com / you@example.com">
+  <span class="error-msg" id="emailError">Veuillez entrer un courriel valide. / Please enter a valid email.</span>
+
+  <label for="memberNotes">Notes (facultatif / optional)</label>
+  <input type="text" id="memberNotes" placeholder="Préférences de cueillette… / Pickup preferences…">
+</div>
+
+<hr>
+
+<!-- Bilingual plant tables -->
+<div class="bilingual">
+
+  <!-- FRENCH -->
+  <div class="col-fr">
+    <div class="col-label">Français</div>
+    <h3 style="font-size:.95rem; margin:8px 0 10px">Plantes disponibles</h3>
+    <div id="loadingMsgFr" class="loading">Chargement de l'inventaire…</div>
+    <table id="plantTableFr" style="display:none">
+      <thead><tr>
+        <th>Plante</th>
+        <th>Type</th>
+        <th>Ensoleillement</th>
+        <th>Prix</th>
+        <th>Stock</th>
+        <th>Qté</th>
+      </tr></thead>
+      <tbody id="plantBodyFr"></tbody>
+    </table>
+    <hr>
+    <div class="cart-section" id="cartSectionFr">
+      <strong>Votre commande :</strong>
+      <ul class="cart-list" id="cartListFr"></ul>
+      <div class="cart-total" id="cartTotalFr"></div>
+    </div>
+    <button class="submit" id="submitBtnFr" disabled>Passer la commande</button>
+    <div class="success-msg" id="successMsgFr">
+      <h2>&#10003; Commande reçue !</h2>
+      <p id="successDetailFr"></p>
+    </div>
+  </div>
+
+  <!-- ENGLISH -->
+  <div class="col-en">
+    <div class="col-label">English</div>
+    <h3 style="font-size:.95rem; margin:8px 0 10px">Available Plants</h3>
+    <div id="loadingMsgEn" class="loading">Loading inventory…</div>
+    <table id="plantTableEn" style="display:none">
+      <thead><tr>
+        <th>Plant</th>
+        <th>Type</th>
+        <th>Sun</th>
+        <th>Price</th>
+        <th>Stock</th>
+        <th>Qty</th>
+      </tr></thead>
+      <tbody id="plantBodyEn"></tbody>
+    </table>
+    <hr>
+    <div class="cart-section" id="cartSectionEn">
+      <strong>Your Order:</strong>
+      <ul class="cart-list" id="cartListEn"></ul>
+      <div class="cart-total" id="cartTotalEn"></div>
+    </div>
+    <button class="submit" id="submitBtnEn" disabled>Place Order</button>
+    <div class="success-msg" id="successMsgEn">
+      <h2>&#10003; Order placed!</h2>
+      <p id="successDetailEn"></p>
+    </div>
+  </div>
+
 </div>
 
 <script>
-// ── CONFIG ──────────────────────────────────────────────
+// ── CONFIG ───────────────────────────────────────────────
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbye0U9HMuWEl25w-nUhuBzLbh_U2MMKjZvH_EFVU3cNp_2gktPW1gJRSHTAPwtQH65auA/exec";
 const MAX_QTY = 5;
 
-// ── DEMO DATA (replaced by live fetch once script is deployed) ──
+// French translations for type/sun/status
+const FR = {
+  type: { "Shrub":"Arbuste", "Tree":"Arbre", "Perennial":"Vivace" },
+  sun:  {
+    "Full sun":"Plein soleil",
+    "Part shade / Full sun":"Mi-ombre / Plein soleil",
+    "Part shade / Shade":"Mi-ombre / Ombre",
+    "Full sun / Part shade":"Plein soleil / Mi-ombre",
+    "Full sun / Part shade / Shade":"Plein soleil / Mi-ombre / Ombre",
+    "Part shade":"Mi-ombre",
+    "Full shade":"Ombre complète"
+  },
+  status: { available:"Disponible", low:"Presque épuisé", soldout:"Épuisé" },
+  avail: function(r){ return r + " disp."; },
+  left:  function(r){ return r + " restant" + (r > 1 ? "s" : ""); }
+};
+
+// Plant common names in French
+const FR_NAMES = {
+  "Aronia melanocarpa":           "Aronie à fruits noirs",
+  "Sambucus nigra":               "Sureau noir",
+  "Cephalanthus occidentalis":    "Céphalanthe occidental",
+  "Spiraea alba":                 "Spirée blanche",
+  "Cornus sericea":               "Cornouiller stolonifère",
+  "Physocarpus opulifolius":      "Physocarpe à feuilles d'obier",
+  "Myrica gale":                  "Myrique baumier",
+  "Rubus odoratus":               "Ronce odorante",
+  "Spiraea tomentosa":            "Spirée tomenteuse",
+  "Betula papyrifera":            "Bouleau à papier",
+  "Betula alleghaniensis":        "Bouleau jaune",
+  "Eutrochium maculatum":         "Eupatoire maculée",
+  "Helenium autumnale":           "Hélénie automnale",
+  "Rudbeckia hirta":              "Rudbeckie hérissée",
+  "Penstemon hirsutus":           "Penstémon hirsute",
+  "Verbena hastata":              "Verveine hastée",
+  "Symphyotrichum novae-angliae": "Aster de Nouvelle-Angleterre",
+  "Solidago caesia":              "Verge d'or glauque",
+  "Asclepias incarnata":          "Asclépiade incarnate"
+};
+
 let PLANTS = [
-  { id:1,  sci:"Aronia melanocarpa",      common:"Black Chokeberry",        type:"Shrub",     sun:"Part shade / Full sun",       location:"Shoreline / Upland", available:0, ordered:0, price:0 },
-  { id:2,  sci:"Sambucus nigra",          common:"Black Elderberry",        type:"Shrub",     sun:"Full sun",                    location:"Shoreline / Upland", available:0, ordered:0, price:0 },
-  { id:3,  sci:"Cephalanthus occidentalis",common:"Buttonbush",             type:"Shrub",     sun:"Part shade / Shade",          location:"Shoreline",          available:0, ordered:0, price:0 },
-  { id:4,  sci:"Spiraea alba",            common:"Narrow-leaved Meadowsweet",type:"Shrub",    sun:"Full sun",                    location:"Shoreline",          available:0, ordered:0, price:0 },
-  { id:5,  sci:"Cornus sericea",          common:"Red Osier Dogwood",       type:"Shrub",     sun:"Full sun / Part shade",       location:"Shoreline / Upland", available:0, ordered:0, price:0 },
-  { id:6,  sci:"Physocarpus opulifolius", common:"Ninebark",                type:"Shrub",     sun:"Full sun / Part shade",       location:"Shoreline / Upland", available:0, ordered:0, price:0 },
-  { id:7,  sci:"Myrica gale",             common:"Sweet Gale",              type:"Shrub",     sun:"Full sun / Part shade",       location:"Shoreline",          available:0, ordered:0, price:0 },
-  { id:8,  sci:"Rubus odoratus",          common:"Flowering Raspberry",     type:"Shrub",     sun:"Full sun / Part shade / Shade",location:"Upland",            available:0, ordered:0, price:0 },
-  { id:9,  sci:"Spiraea tomentosa",       common:"Steeplebush",             type:"Shrub",     sun:"Full sun",                    location:"Shoreline",          available:0, ordered:0, price:0 },
-  { id:10, sci:"Betula papyrifera",       common:"White Birch",             type:"Tree",      sun:"Full sun",                    location:"Shoreline / Upland", available:0, ordered:0, price:0 },
-  { id:11, sci:"Betula alleghaniensis",   common:"Yellow Birch",            type:"Tree",      sun:"Part shade / Shade",          location:"Shoreline",          available:0, ordered:0, price:0 },
-  { id:12, sci:"Eutrochium maculatum",    common:"Joe-Pye Weed",            type:"Perennial", sun:"Full sun / Part shade",       location:"Shoreline",          available:0, ordered:0, price:0 },
-  { id:13, sci:"Helenium autumnale",      common:"Sneezeweed",              type:"Perennial", sun:"Full sun / Part shade",       location:"Shoreline / Upland", available:0, ordered:0, price:0 },
-  { id:14, sci:"Rudbeckia hirta",         common:"Black-eyed Susan",        type:"Perennial", sun:"Full sun",                    location:"Upland",             available:0, ordered:0, price:0 },
-  { id:15, sci:"Penstemon hirsutus",      common:"Hairy Beardtongue",       type:"Perennial", sun:"Full sun / Part shade",       location:"Upland",             available:0, ordered:0, price:0 },
-  { id:16, sci:"Verbena hastata",         common:"Blue Vervain",            type:"Perennial", sun:"Full sun / Part shade / Shade",location:"Upland",            available:0, ordered:0, price:0 },
-  { id:17, sci:"Symphyotrichum novae-angliae",common:"New England Aster",   type:"Perennial", sun:"Full sun / Part shade",       location:"Shoreline / Upland", available:0, ordered:0, price:0 },
-  { id:18, sci:"Solidago caesia",         common:"Bluestem Goldenrod",      type:"Perennial", sun:"Full sun / Part shade",       location:"Upland",             available:0, ordered:0, price:0 },
-  { id:19, sci:"Asclepias incarnata",     common:"Swamp Milkweed",          type:"Perennial", sun:"Full sun / Part shade",       location:"Shoreline / Upland", available:0, ordered:0, price:0 },
+  { id:1,  sci:"Aronia melanocarpa",           common:"Black Chokeberry",          type:"Shrub",     sun:"Part shade / Full sun",        location:"Shoreline / Upland", available:0, ordered:0, price:0 },
+  { id:2,  sci:"Sambucus nigra",               common:"Black Elderberry",          type:"Shrub",     sun:"Full sun",                     location:"Shoreline / Upland", available:0, ordered:0, price:0 },
+  { id:3,  sci:"Cephalanthus occidentalis",    common:"Buttonbush",                type:"Shrub",     sun:"Part shade / Shade",           location:"Shoreline",          available:0, ordered:0, price:0 },
+  { id:4,  sci:"Spiraea alba",                 common:"Narrow-leaved Meadowsweet", type:"Shrub",     sun:"Full sun",                     location:"Shoreline",          available:0, ordered:0, price:0 },
+  { id:5,  sci:"Cornus sericea",               common:"Red Osier Dogwood",         type:"Shrub",     sun:"Full sun / Part shade",        location:"Shoreline / Upland", available:0, ordered:0, price:0 },
+  { id:6,  sci:"Physocarpus opulifolius",      common:"Ninebark",                  type:"Shrub",     sun:"Full sun / Part shade",        location:"Shoreline / Upland", available:0, ordered:0, price:0 },
+  { id:7,  sci:"Myrica gale",                  common:"Sweet Gale",                type:"Shrub",     sun:"Full sun / Part shade",        location:"Shoreline",          available:0, ordered:0, price:0 },
+  { id:8,  sci:"Rubus odoratus",               common:"Flowering Raspberry",       type:"Shrub",     sun:"Full sun / Part shade / Shade",location:"Upland",             available:0, ordered:0, price:0 },
+  { id:9,  sci:"Spiraea tomentosa",            common:"Steeplebush",               type:"Shrub",     sun:"Full sun",                     location:"Shoreline",          available:0, ordered:0, price:0 },
+  { id:10, sci:"Betula papyrifera",            common:"White Birch",               type:"Tree",      sun:"Full sun",                     location:"Shoreline / Upland", available:0, ordered:0, price:0 },
+  { id:11, sci:"Betula alleghaniensis",        common:"Yellow Birch",              type:"Tree",      sun:"Part shade / Shade",           location:"Shoreline",          available:0, ordered:0, price:0 },
+  { id:12, sci:"Eutrochium maculatum",         common:"Joe-Pye Weed",              type:"Perennial", sun:"Full sun / Part shade",        location:"Shoreline",          available:0, ordered:0, price:0 },
+  { id:13, sci:"Helenium autumnale",           common:"Sneezeweed",                type:"Perennial", sun:"Full sun / Part shade",        location:"Shoreline / Upland", available:0, ordered:0, price:0 },
+  { id:14, sci:"Rudbeckia hirta",              common:"Black-eyed Susan",          type:"Perennial", sun:"Full sun",                     location:"Upland",             available:0, ordered:0, price:0 },
+  { id:15, sci:"Penstemon hirsutus",           common:"Hairy Beardtongue",         type:"Perennial", sun:"Full sun / Part shade",        location:"Upland",             available:0, ordered:0, price:0 },
+  { id:16, sci:"Verbena hastata",              common:"Blue Vervain",              type:"Perennial", sun:"Full sun / Part shade / Shade",location:"Upland",             available:0, ordered:0, price:0 },
+  { id:17, sci:"Symphyotrichum novae-angliae", common:"New England Aster",         type:"Perennial", sun:"Full sun / Part shade",        location:"Shoreline / Upland", available:0, ordered:0, price:0 },
+  { id:18, sci:"Solidago caesia",              common:"Bluestem Goldenrod",        type:"Perennial", sun:"Full sun / Part shade",        location:"Upland",             available:0, ordered:0, price:0 },
+  { id:19, sci:"Asclepias incarnata",          common:"Swamp Milkweed",            type:"Perennial", sun:"Full sun / Part shade",        location:"Shoreline / Upland", available:0, ordered:0, price:0 },
 ];
 
+// Shared cart — one cart for both columns, keyed by plant id
 let cart = {};
 
-// ── FETCH LIVE INVENTORY ─────────────────────────────────
+// ── FETCH INVENTORY ──────────────────────────────────────
 async function fetchInventory() {
-  if (APPS_SCRIPT_URL.includes("YOUR_SCRIPT_ID")) { renderTable(); return; }
+  if (APPS_SCRIPT_URL.includes("YOUR_SCRIPT_ID")) { renderBoth(); return; }
   try {
     const res  = await fetch(APPS_SCRIPT_URL + "?action=getInventory");
     const data = await res.json();
     if (data && data.plants && data.plants.length > 0) PLANTS = data.plants;
-  } catch(e) { /* fall back to demo data */ }
-  renderTable();
+  } catch(e) {}
+  renderBoth();
+}
+
+function renderBoth() {
+  renderTable("Fr");
+  renderTable("En");
 }
 
 // ── RENDER TABLE ─────────────────────────────────────────
 function rem(p) { return Math.max(0, p.available - p.ordered); }
 
-function renderTable() {
-  document.getElementById("loadingMsg").style.display = "none";
-  document.getElementById("plantTable").style.display = "table";
-  const tbody = document.getElementById("plantBody");
+function renderTable(lang) {
+  var isFr = lang === "Fr";
+  document.getElementById("loadingMsg" + lang).style.display = "none";
+  document.getElementById("plantTable" + lang).style.display = "table";
+  var tbody = document.getElementById("plantBody" + lang);
   tbody.innerHTML = "";
 
-  PLANTS.forEach(p => {
-    const r      = rem(p);
-    const sold   = r <= 0;
-    const low    = r > 0 && r <= 3;
-    const status = sold ? "soldout" : low ? "low" : "available";
-    const label  = sold ? "Sold out" : low ? r + " left" : r + " avail.";
-    const inCart = cart[p.id] || 0;
+  PLANTS.forEach(function(p) {
+    var r      = rem(p);
+    var sold   = r <= 0;
+    var low    = r > 0 && r <= 3;
+    var status = sold ? "soldout" : low ? "low" : "available";
+    var inCart = cart[p.id] || 0;
 
-    const tr = document.createElement("tr");
+    var displayName = isFr ? (FR_NAMES[p.sci] || p.common) : p.common;
+    var displayType = isFr ? (FR.type[p.type] || p.type) : p.type;
+    var displaySun  = isFr ? (FR.sun[p.sun]   || p.sun)  : p.sun;
+    var statusLabel, stockLabel;
+
+    if (isFr) {
+      statusLabel = sold ? "Épuisé" : low ? FR.left(r) : FR.avail(r);
+    } else {
+      statusLabel = sold ? "Sold out" : low ? r + " left" : r + " avail.";
+    }
+
+    var tr = document.createElement("tr");
     if (sold) tr.className = "sold-out";
 
     tr.innerHTML =
-      "<td><strong>" + p.common + "</strong><br>" +
-        "<span style='color:#666;font-size:.8rem'>" + p.sci + "</span></td>" +
-      "<td>" + p.type + "</td>" +
-      "<td>" + p.sun + "</td>" +
-      "<td>" + (p.price > 0 ? "$" + p.price.toFixed(2) : "—") + "</td>" +
-      "<td><span class='status-badge status-" + status + "'>" + label + "</span></td>" +
+      "<td><strong>" + displayName + "</strong><br><span style='color:#666;font-size:.75rem'>" + p.sci + "</span></td>" +
+      "<td>" + displayType + "</td>" +
+      "<td style='font-size:.78rem'>" + displaySun + "</td>" +
+      "<td>" + (p.price > 0 ? "$" + parseFloat(p.price).toFixed(2) : "—") + "</td>" +
+      "<td><span class='status-badge status-" + status + "'>" + statusLabel + "</span></td>" +
       "<td>" + (sold ? "—" :
         "<div class='qty-ctrl'>" +
-          "<button data-id='" + p.id + "' data-action='dec'" + (inCart <= 0 ? " disabled" : "") + ">−</button>" +
+          "<button data-id='" + p.id + "' data-lang='" + lang + "' data-action='dec'" + (inCart <= 0 ? " disabled" : "") + ">−</button>" +
           "<span class='qty-val'>" + inCart + "</span>" +
-          "<button data-id='" + p.id + "' data-action='inc'" + (inCart >= Math.min(r, MAX_QTY) ? " disabled" : "") + ">+</button>" +
+          "<button data-id='" + p.id + "' data-lang='" + lang + "' data-action='inc'" + (inCart >= Math.min(r, MAX_QTY) ? " disabled" : "") + ">+</button>" +
         "</div>") + "</td>";
 
     tbody.appendChild(tr);
@@ -201,44 +329,49 @@ function renderTable() {
 
   tbody.querySelectorAll("button[data-action]").forEach(function(btn) {
     btn.addEventListener("click", function() {
-      const id  = parseInt(btn.dataset.id);
-      const p   = PLANTS.find(function(x){ return x.id === id; });
-      const max = Math.min(rem(p), MAX_QTY);
-      const cur = cart[id] || 0;
-      const next = btn.dataset.action === "inc" ? cur + 1 : cur - 1;
-      if (next <= 0)   delete cart[id];
-      else if (next > max) return;
-      else             cart[id] = next;
-      renderTable();
-      renderCart();
+      var id   = parseInt(btn.dataset.id);
+      var p    = PLANTS.find(function(x){ return x.id === id; });
+      var max  = Math.min(rem(p), MAX_QTY);
+      var cur  = cart[id] || 0;
+      var next = btn.dataset.action === "inc" ? cur + 1 : cur - 1;
+      if (next <= 0)        delete cart[id];
+      else if (next > max)  return;
+      else                  cart[id] = next;
+      renderBoth();
+      renderCart("Fr");
+      renderCart("En");
     });
   });
 }
 
 // ── RENDER CART ──────────────────────────────────────────
-function renderCart() {
-  const entries = Object.entries(cart).filter(function(e){ return e[1] > 0; });
-  const section = document.getElementById("cartSection");
-  const list    = document.getElementById("cartList");
-  const btn     = document.getElementById("submitBtn");
+function renderCart(lang) {
+  var isFr    = lang === "Fr";
+  var entries = Object.entries(cart).filter(function(e){ return e[1] > 0; });
+  var section = document.getElementById("cartSection" + lang);
+  var list    = document.getElementById("cartList" + lang);
+  var btn     = document.getElementById("submitBtn" + lang);
+  var totalEl = document.getElementById("cartTotal" + lang);
 
   if (entries.length === 0) {
     section.style.display = "none";
     btn.disabled = true;
     return;
   }
+
   section.style.display = "block";
   var total = 0;
   list.innerHTML = entries.map(function(e) {
-    const p = PLANTS.find(function(x){ return x.id == e[0]; });
-    const lineTotal = p.price > 0 ? p.price * e[1] : null;
+    var p = PLANTS.find(function(x){ return x.id == e[0]; });
+    var displayName = isFr ? (FR_NAMES[p.sci] || p.common) : p.common;
+    var lineTotal = p.price > 0 ? parseFloat(p.price) * e[1] : null;
     if (lineTotal) total += lineTotal;
-    const priceStr = lineTotal ? " — $" + lineTotal.toFixed(2) : "";
-    return "<li>" + p.common + " &times; " + e[1] + priceStr + "</li>";
+    var priceStr = lineTotal ? " — $" + lineTotal.toFixed(2) : "";
+    return "<li>" + displayName + " &times; " + e[1] + priceStr + "</li>";
   }).join("");
-  var totalEl = document.getElementById("cartTotal");
+
   if (total > 0) {
-    totalEl.textContent = "Total: $" + total.toFixed(2);
+    totalEl.textContent = (isFr ? "Total : $" : "Total: $") + total.toFixed(2);
     totalEl.style.display = "block";
   } else {
     totalEl.style.display = "none";
@@ -247,71 +380,80 @@ function renderCart() {
 }
 
 // ── SUBMIT ───────────────────────────────────────────────
-document.getElementById("submitBtn").addEventListener("click", async function() {
-  const name  = document.getElementById("memberName").value.trim();
-  const email = document.getElementById("memberEmail").value.trim();
+function setupSubmit(lang) {
+  var isFr = lang === "Fr";
+  document.getElementById("submitBtn" + lang).addEventListener("click", async function() {
+    var name  = document.getElementById("memberName").value.trim();
+    var email = document.getElementById("memberEmail").value.trim();
 
-  document.getElementById("nameError").style.display  = name ? "none" : "block";
-  document.getElementById("emailError").style.display = (email && email.includes("@")) ? "none" : "block";
-  if (!name || !email || !email.includes("@")) return;
+    document.getElementById("nameError").style.display  = name ? "none" : "block";
+    document.getElementById("emailError").style.display = (email && email.includes("@")) ? "none" : "block";
+    if (!name || !email || !email.includes("@")) return;
 
-  const items = Object.entries(cart)
-    .filter(function(e){ return e[1] > 0; })
-    .map(function(e) {
-      const p = PLANTS.find(function(x){ return x.id == e[0]; });
-      return { sci: p.sci, common: p.common, qty: e[1], price: p.price || 0 };
+    var items = Object.entries(cart)
+      .filter(function(e){ return e[1] > 0; })
+      .map(function(e) {
+        var p = PLANTS.find(function(x){ return x.id == e[0]; });
+        return { sci: p.sci, common: p.common, qty: e[1], price: p.price || 0 };
+      });
+
+    var btn = document.getElementById("submitBtn" + lang);
+    btn.disabled = true;
+    btn.textContent = isFr ? "Envoi en cours…" : "Submitting…";
+
+    var payload = {
+      name: name, email: email,
+      notes: document.getElementById("memberNotes").value.trim(),
+      items: items, timestamp: new Date().toISOString()
+    };
+
+    try {
+      await fetch(APPS_SCRIPT_URL + "?action=submitOrder", {
+        method: "POST", mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    } catch(e) {}
+
+    items.forEach(function(item) {
+      var p = PLANTS.find(function(x){ return x.sci === item.sci; });
+      if (p) p.ordered += item.qty;
     });
 
-  const btn = document.getElementById("submitBtn");
-  btn.disabled = true;
-  btn.textContent = "Submitting…";
+    var orderNum   = "ORD-" + Date.now().toString().slice(-6);
+    var orderTotal = items.reduce(function(s, i){ return s + (i.price||0) * i.qty; }, 0);
+    var summary    = items.map(function(i){
+      var displayName = isFr ? (FR_NAMES[i.sci] || i.common) : i.common;
+      return i.qty + "x " + displayName + (i.price ? " ($" + (i.price * i.qty).toFixed(2) + ")" : "");
+    }).join(", ");
 
-  const payload = {
-    name: name, email: email,
-    notes: document.getElementById("memberNotes").value.trim(),
-    items: items, timestamp: new Date().toISOString()
-  };
+    var detail = isFr
+      ? "Commande " + orderNum + " reçue pour " + name + " (" + email + ") : " + summary + (orderTotal > 0 ? ". Total : $" + orderTotal.toFixed(2) : "") + ". Une confirmation a été envoyée à votre courriel."
+      : "Order " + orderNum + " received for " + name + " (" + email + "): " + summary + (orderTotal > 0 ? ". Total: $" + orderTotal.toFixed(2) : "") + ". A confirmation has been sent to your email.";
 
-  try {
-    await fetch(APPS_SCRIPT_URL + "?action=submitOrder", {
-      method: "POST", mode: "no-cors",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-  } catch(e) {}
+    document.getElementById("successDetail" + lang).textContent = detail;
+    document.getElementById("successMsg" + lang).style.display = "block";
 
-  items.forEach(function(item) {
-    const p = PLANTS.find(function(x){ return x.sci === item.sci; });
-    if (p) p.ordered += item.qty;
+    cart = {};
+    renderBoth();
+    renderCart("Fr");
+    renderCart("En");
+    btn.textContent = isFr ? "Passer la commande" : "Place Order";
+    window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
   });
-
-  const orderNum = "ORD-" + Date.now().toString().slice(-6);
-  var orderTotal = items.reduce(function(sum,i){ return sum + (i.price||0)*i.qty; }, 0);
-  const summary  = items.map(function(i){ return i.qty + "x " + i.common + (i.price ? " ($" + (i.price*i.qty).toFixed(2) + ")" : ""); }).join(", ");
-  document.getElementById("successDetail").textContent =
-    "Order " + orderNum + " received for " + name + " (" + email + "): " + summary + (orderTotal > 0 ? ". Total: $" + orderTotal.toFixed(2) : "") + ". A confirmation has been sent to your email.";
-  document.getElementById("successMsg").style.display = "block";
-
-  cart = {};
-  renderTable();
-  renderCart();
-  btn.textContent = "Place Order";
-  window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
-});
+}
 
 // ── INIT ─────────────────────────────────────────────────
+setupSubmit("Fr");
+setupSubmit("En");
 fetchInventory();
 </script>
 
 <!--
 ═══════════════════════════════════════════════════════════
-  GOOGLE APPS SCRIPT
-  1. In your Google Sheet: Extensions → Apps Script
-  2. Paste everything between the dashed lines below
-  3. Deploy → New deployment → Web App
-     Execute as: Me | Who has access: Anyone
-  4. Copy the Web App URL into APPS_SCRIPT_URL above
-───────────────────────────────────────────────────────────
+  GOOGLE APPS SCRIPT — paste into Extensions → Apps Script
+  then deploy as Web App (Execute as: Me, Access: Anyone)
+═══════════════════════════════════════════════════════════
 
 function doGet(e) {
   if (e.parameter.action === "getInventory") return getInventory();
@@ -331,6 +473,7 @@ function getInventory() {
   for (var i = 3; i < data.length; i++) {
     var r = data[i];
     if (!r[0]) continue;
+    Logger.log("Row " + i + ": " + r[0] + " | avail:" + r[5] + " | ordered:" + r[6] + " | price:" + r[7]);
     plants.push({ id:i, sci:r[0], common:r[1], type:r[2],
                   sun:r[3], location:r[4], available:r[5], ordered:r[6], price:r[7]||0 });
   }
@@ -345,38 +488,54 @@ function processOrder(payload) {
   var inv    = ss.getSheetByName("Inventory");
   var data   = inv.getDataRange().getValues();
   var accepted = [], rejected = [];
-  var orderNum = "ORD-" + Utilities.formatDate(new Date(),"GMT","yyMMddHHmmss");
+  var orderNum = "ORD-" + Utilities.formatDate(new Date(), "GMT", "yyMMddHHmmss");
 
   payload.items.forEach(function(item) {
     for (var i = 3; i < data.length; i++) {
       if (data[i][0] !== item.sci) continue;
       var rem = data[i][5] - data[i][6];
-      if (rem <= 0) { rejected.push(item.common + " (sold out)"); break; }
+      if (rem <= 0) { rejected.push(item.common + " (sold out / epuise)"); break; }
       var qty = Math.min(item.qty, rem);
-      var lineTotal = (item.price||0) * qty;
-      orders.appendRow([item.sci, payload.name, qty, item.price||0, lineTotal, payload.email,
-                        new Date().toLocaleString(), orderNum, payload.notes||""]);
-      accepted.push(item.common + " x" + qty + (item.price ? " ($" + (item.price*qty).toFixed(2) + ")" : ""));
+      var lineTotal = (item.price || 0) * qty;
+      orders.appendRow([item.sci, payload.name, qty, item.price||0, lineTotal,
+                        payload.email, new Date().toLocaleString(), orderNum, payload.notes||""]);
+      accepted.push(item.common + " x" + qty + (item.price ? " ($" + lineTotal.toFixed(2) + ")" : ""));
       break;
     }
   });
 
-  var grandTotal = payload.items.reduce(function(s,i){ return s + (i.price||0)*Math.min(i.qty, 999); }, 0);
-  var body = "Hi " + payload.name + ",\n\n";
-  if (accepted.length) body += "Order confirmed (#" + orderNum + "):\n" +
-    accepted.map(function(a){ return "  - " + a; }).join("\n") + (grandTotal > 0 ? "\n\nOrder total: $" + grandTotal.toFixed(2) : "") + "\n\n";
-  if (rejected.length) body += "Sold out (not processed):\n" +
-    rejected.map(function(r){ return "  - " + r; }).join("\n") + "\n\n";
-  body += "See you at the plant sale!\n";
+  var grandTotal = payload.items.reduce(function(s,i){ return s + (i.price||0)*i.qty; }, 0);
+  var body = "Bonjour / Hi " + payload.name + ",\n\n";
+  if (accepted.length) {
+    body += "Commande confirmee / Order confirmed (#" + orderNum + "):\n";
+    body += accepted.map(function(a){ return "  - " + a; }).join("\n");
+    if (grandTotal > 0) body += "\n\nTotal: $" + grandTotal.toFixed(2);
+    body += "\n\n";
+  }
+  if (rejected.length) {
+    body += "Epuise / Sold out (non traite / not processed):\n";
+    body += rejected.map(function(r){ return "  - " + r; }).join("\n");
+    body += "\n\n";
+  }
+  body += "Au plaisir de vous voir a la vente! / See you at the plant sale!\n";
 
-  MailApp.sendEmail(payload.email, "Plant Sale - Order " + orderNum, body);
+  MailApp.sendEmail(payload.email, "Vente de plantes / Plant Sale - " + orderNum, body);
 
   return ContentService
     .createTextOutput(JSON.stringify({ success:true, orderNum:orderNum }))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-───────────────────────────────────────────────────────────
+function testData() {
+  var inv  = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Inventory");
+  var data = inv.getDataRange().getValues();
+  for (var i = 3; i < data.length; i++) {
+    var r = data[i];
+    if (!r[0]) continue;
+    Logger.log("Row " + i + ": " + r[0] + " | avail:" + r[5] + " | ordered:" + r[6] + " | price:" + r[7]);
+  }
+}
+
 -->
 </body>
 </html>
